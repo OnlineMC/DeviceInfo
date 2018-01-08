@@ -20,6 +20,10 @@ import org.hyperic.sigar.Who;
 
 public class Infomation { 
 	private String str = "";
+	private long ramDivisor = 1048576L;
+	private String ramUnit = "MB";
+	private long diskDivisor = 1024L;
+	private String diskUnit = "MB";
 	
 	public String getInfoString(){
 		return str;
@@ -29,8 +33,33 @@ public class Infomation {
 		this.str = this.str+str+"\n";
 	}
 	
+	public Infomation(){
+		
+	}
 	
+	public Infomation(String size){
+		size = size.toLowerCase();
+		switch(size){
+		
+		case "k":
+			ramDivisor = ramDivisor/1024;
+			ramUnit = "KB";
+			diskDivisor = diskDivisor/1024;
+			diskUnit = "KB";
+			break;
+		case "g":
+			ramDivisor = ramDivisor*1024;
+			ramUnit = "GB";
+			diskDivisor = diskDivisor*1024;
+			diskUnit = "GB";
+			break;
+		}
+		
+	}
 	
+	/**
+	 * 代码例子来自:http://www.cnblogs.com/jifeng/archive/2012/05/16/2503519.html
+	 * */
     public void init() { 
         try { 
             // System信息，从jvm获取 
@@ -110,18 +139,18 @@ public class Infomation {
         Sigar sigar = new Sigar();
         Mem mem = sigar.getMem(); 
         // 内存总量 
-        addText("内存总量:    " + mem.getTotal() / 1024L + "K av"); 
+        addText("内存总量:    " +(double) mem.getTotal() / ramDivisor + ramUnit); 
         // 当前内存使用量 
-        addText("当前内存使用量:    " + mem.getUsed() / 1024L + "K used"); 
+        addText("当前内存使用量:    " +(double) mem.getUsed() / ramDivisor + ramUnit); 
         // 当前内存剩余量 
-        addText("当前内存剩余量:    " + mem.getFree() / 1024L + "K free"); 
+        addText("当前内存剩余量:    " +(double) mem.getFree() / ramDivisor + ramUnit); 
         Swap swap = sigar.getSwap(); 
         // 交换区总量 
-        addText("交换区总量:    " + swap.getTotal() / 1024L + "K av"); 
+        addText("交换区/虚拟内存总量:    " +(double) swap.getTotal() / ramDivisor + ramUnit); 
         // 当前交换区使用量 
-        addText("当前交换区使用量:    " + swap.getUsed() / 1024L + "K used"); 
+        addText("当前交换区/虚拟内存使用量:    " +(double) swap.getUsed() / ramDivisor + ramUnit); 
         // 当前交换区剩余量 
-        addText("当前交换区剩余量:    " + swap.getFree() / 1024L + "K free"); 
+        addText("当前交换区/虚拟内存剩余量:    " +(double) swap.getFree() / ramDivisor + ramUnit); 
     } 
 
     private void cpu() throws SigarException, MalformedURLException { 
@@ -132,11 +161,11 @@ public class Infomation {
         cpuList = sigar.getCpuPercList(); 
         for (int i = 0; i < infos.length; i++) {// 不管是单块CPU还是多CPU都适用 
             CpuInfo info = infos[i]; 
-            addText("第" + (i + 1) + "块CPU信息"); 
-            addText("CPU的总量MHz:    " + info.getMhz());// CPU的总量MHz 
+            addText("CPU核心-" + (i + 1) + " 信息"); 
+            addText("CPU频率:    " + info.getMhz()+"MHz");// CPU的总量MHz 
             addText("CPU生产商:    " + info.getVendor());// 获得CPU的卖主，如：Intel 
             addText("CPU类别:    " + info.getModel());// 获得CPU的类别，如：Celeron 
-            addText("CPU缓存数量:    " + info.getCacheSize());// 缓冲存储器数量 
+            addText("CPU缓存数量:    " + info.getCacheSize()+"KB");// 缓冲存储器数量 
             printCpuPerc(cpuList[i]); 
         } 
     } 
@@ -215,13 +244,13 @@ public class Infomation {
                 break; 
             case 2: // TYPE_LOCAL_DISK : 本地硬盘 
                 // 文件系统总大小 
-                addText(fs.getDevName() + "总大小:    " + usage.getTotal() + "KB"); 
+                addText(fs.getDevName() + "总大小:    " +(double)(usage.getTotal()/ diskDivisor) + diskUnit); 
                 // 文件系统剩余大小 
-                addText(fs.getDevName() + "剩余大小:    " + usage.getFree() + "KB"); 
+                addText(fs.getDevName() + "剩余大小:    " +(double) (usage.getFree()/ diskDivisor) + diskUnit); 
                 // 文件系统可用大小 
-                addText(fs.getDevName() + "可用大小:    " + usage.getAvail() + "KB"); 
+                addText(fs.getDevName() + "可用大小:    " + (double)(usage.getAvail()/ diskDivisor) + diskUnit); 
                 // 文件系统已经使用量 
-                addText(fs.getDevName() + "已经使用量:    " + usage.getUsed() + "KB"); 
+                addText(fs.getDevName() + "已经使用量:    " +(double) (usage.getUsed()/ diskDivisor) + diskUnit); 
                 double usePercent = usage.getUsePercent() * 100D; 
                 // 文件系统资源的利用率 
                 addText(fs.getDevName() + "资源的利用率:    " + usePercent + "%"); 
@@ -235,8 +264,9 @@ public class Infomation {
             case 6:// TYPE_SWAP ：页面交换 
                 break; 
             } 
-            addText(fs.getDevName() + "读出：    " + usage.getDiskReads()); 
-            addText(fs.getDevName() + "写入：    " + usage.getDiskWrites()); 
+            addText("本次开机");
+            addText(fs.getDevName() + "读取:    " +(double) (usage.getDiskReads() / diskDivisor) + diskUnit); 
+            addText(fs.getDevName() + "写入:    " +(double) (usage.getDiskWrites() / diskDivisor) + diskUnit); 
         } 
         return; 
     } 

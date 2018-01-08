@@ -116,6 +116,7 @@ public class DriverInfo extends JavaPlugin {
 			sender.sendMessage("§e你需要 driverinfo.use 权限来执行这个");
 			return false;
 		}
+			
 			String time = new SimpleDateFormat("YYYYMMDD_HHmmss").format(new Date());
 			File outFile = new File(infoListFolder + time + ".txt");
 			BufferedWriter output = null;
@@ -125,7 +126,12 @@ public class DriverInfo extends JavaPlugin {
 				}
 				output = new BufferedWriter(new FileWriter(outFile, true));
 
-				Infomation info = new Infomation();
+				Infomation info = null;
+				if(args.length>0){
+					info = new Infomation(args[0]);
+				}else{
+					info = new Infomation();
+				}
 				info.init();
 
 				output.write(info.getInfoString());
