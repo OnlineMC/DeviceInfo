@@ -5,7 +5,7 @@ first start need restart your minecraft server (auto)
 
 use command `/drinfo`Generate information table to `plugins/DriverInfo/InfoList`
 # Permission
-**Generate information table** : driverinfo.use
+**Generate information table** : `driverinfo.use`
 
 # The project used code
 - https://github.com/hyperic/sigar
