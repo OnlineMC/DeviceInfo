@@ -1,0 +1,5 @@
+name: DriverInfo
+version: 1.0
+main: cn.onlinemc.DriverInfo.DriverInfo
+commands:
+  drinfo:
